@@ -18,12 +18,12 @@ class CollectionError(Exception):
 
 def request_json(url, method='GET', token=None):
     request = urllib.request.Request(url, data=b'{}' if method=='POST' else None, method=method,
-        headers={'Authorization': 'Bearer '+token} if token else {})
+        headers={'User-Agent':'wallet-watch/1.0','Accept':'application/json', **({'Authorization':'Bearer '+token} if token else {})})
     try:
         with urllib.request.urlopen(request, timeout=100) as response:
             return json.load(response)
     except urllib.error.HTTPError as exc:
-        raise CollectionError('HTTP_'+str(exc.code)) from None
+        raise CollectionError(('SITE_' if url.startswith(ORIGIN+'/') else 'OIDC_')+'HTTP_'+str(exc.code)+'_challenge_'+str(exc.headers.get('cf-mitigated','none'))) from None
     except (OSError, ValueError):
         raise CollectionError('NETWORK_OR_JSON_ERROR') from None
 
