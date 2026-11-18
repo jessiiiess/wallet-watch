@@ -1,0 +1,26 @@
+name: Wallet collection
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '2-59/5 * * * *'
+  push:
+    branches: [main]
+    paths: [collect.py, .github/workflows/collect.yml]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: wallet-collection
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Collect and verify published batch
+        env:
+          SITE_ORIGIN: https://jessie-wallet-watch.proudbuttercup1.chatgpt.site
+        run: python3 -u collect.py
